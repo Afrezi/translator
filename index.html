@@ -439,9 +439,8 @@
                     <div class="history-source">From: ${escapeHtml(item.source.substring(0, 100))}${item.source.length > 100 ? '...' : ''}</div>
                     <div class="history-result">${escapeHtml(item.result)}</div>
                     <button class="delete-item-btn" onclick="deleteHistoryItem(${item.id})" title="Hapus">
-                        <svg viewBox="0 0 24 24">
-                            <polyline points="12 8 12 12 14 14"></polyline>
-                            <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                         </svg>
                     </button>
                 `;
