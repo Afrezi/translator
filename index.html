@@ -185,7 +185,7 @@
             right: 30px;
             width: 60px;
             height: 60px;
-            background-color: #2196F3;
+            background-color: #4CAF50;
             border-radius: 50%;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             display: flex;
@@ -201,10 +201,12 @@
             transform: scale(1.1);
         }
 
+        /* UPDATED CSS FOR NEW ICON */
         .history-btn svg {
             width: 30px;
             height: 30px;
-            fill: white;
+            stroke: white; /* Menggunakan stroke karena icon baru berbasis garis */
+            fill: none;    /* Memastikan tidak ada fill hitam */
         }
 
         .history-sidebar {
@@ -361,8 +363,8 @@
     </div>
 
     <div class="history-btn" id="historyToggleBtn" title="Lihat History">
-        <svg viewBox="0 0 24 24">
-            <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 1 13 21a9 9 0 0 1 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z"/>
         </svg>
     </div>
 
