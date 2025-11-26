@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Translator</title>
+    <title>AI Translator + History</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -178,6 +178,126 @@
             transition: background-color 0.5s;
         }
 
+        /* --- HISTORY STYLES START --- */
+        .history-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: #2196F3;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+
+        .history-btn:hover {
+            background-color: #1976D2;
+            transform: scale(1.1);
+        }
+
+        .history-btn svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        .history-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px; /* Sembunyi secara default */
+            width: 350px;
+            height: 100vh;
+            background-color: #2a2a2a;
+            box-shadow: -4px 0 10px rgba(0,0,0,0.5);
+            z-index: 1001;
+            transition: right 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .history-sidebar.open {
+            right: 0;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .close-history {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
+            width: auto;
+            padding: 0;
+            min-height: auto;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            position: relative;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .history-source {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .history-result {
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        .delete-item-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            width: auto;
+            min-height: auto;
+            padding: 5px;
+        }
+
+        .delete-item-btn:hover {
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 4px;
+        }
+        
+        .empty-history {
+            text-align: center;
+            color: #777;
+            margin-top: 50px;
+        }
+        /* --- HISTORY STYLES END --- */
+
         @media (max-width: 1024px) {
             .translator-layout { flex-direction: column; }
             .translator-middle {
@@ -192,6 +312,8 @@
         @media (max-width: 600px) {
             .translator-middle { flex-direction: column; }
             .translator-middle>* { width: 100%; }
+            .history-sidebar { width: 100%; right: -100%; }
+            .history-btn { width: 50px; height: 50px; bottom: 20px; right: 20px; }
         }
     </style>
 </head>
@@ -238,11 +360,30 @@
         </div>
     </div>
 
+    <div class="history-btn" id="historyToggleBtn" title="Lihat History">
+        <svg viewBox="0 0 24 24">
+            <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 1 13 21a9 9 0 0 1 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+        </svg>
+    </div>
+
+    <div class="history-sidebar" id="historySidebar">
+        <div class="history-header">
+            <h3>Riwayat Terjemahan</h3>
+            <button class="close-history" id="closeHistoryBtn">&times;</button>
+        </div>
+        <div class="history-list" id="historyList">
+            </div>
+    </div>
+
     <script>
         // Default URL jika user tidak mengubahnya
         const DEFAULT_API_URL = 'https://api.cerebras.ai/v1/chat/completions';
 
-        // Cek dan set API key & URL dari localStorage saat halaman dimuat
+        // History Management
+        const historySidebar = document.getElementById('historySidebar');
+        const historyListEl = document.getElementById('historyList');
+        
+        // Load API Key, URL, dan Setup History saat halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
             // Load API Key
             const savedApiKey = localStorage.getItem('openaiApiKey');
@@ -250,7 +391,7 @@
                 document.getElementById('apiKey').value = savedApiKey;
             }
 
-            // Load API URL (MODIFIKASI)
+            // Load API URL
             const savedApiUrl = localStorage.getItem('customApiUrl');
             const apiUrlInput = document.getElementById('apiUrl');
             
@@ -259,14 +400,96 @@
             } else {
                 apiUrlInput.value = DEFAULT_API_URL;
             }
+
+            // Load History UI
+            renderHistory();
         });
+
+        // Toggle History Sidebar
+        document.getElementById('historyToggleBtn').addEventListener('click', () => {
+            historySidebar.classList.add('open');
+        });
+
+        document.getElementById('closeHistoryBtn').addEventListener('click', () => {
+            historySidebar.classList.remove('open');
+        });
+
+        // Menutup sidebar jika klik di luar area sidebar (opsional tapi bagus untuk UX)
+        document.addEventListener('click', (e) => {
+            if (!historySidebar.contains(e.target) && !document.getElementById('historyToggleBtn').contains(e.target) && historySidebar.classList.contains('open')) {
+                historySidebar.classList.remove('open');
+            }
+        });
+
+        // Fungsi Render History
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('translationHistory')) || [];
+            historyListEl.innerHTML = '';
+
+            if (history.length === 0) {
+                historyListEl.innerHTML = '<div class="empty-history">Belum ada riwayat.</div>';
+                return;
+            }
+
+            // Urutkan dari yang terbaru (reverse)
+            history.slice().reverse().forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'history-item';
+                itemDiv.innerHTML = `
+                    <div class="history-source">From: ${escapeHtml(item.source.substring(0, 100))}${item.source.length > 100 ? '...' : ''}</div>
+                    <div class="history-result">${escapeHtml(item.result)}</div>
+                    <button class="delete-item-btn" onclick="deleteHistoryItem(${item.id})" title="Hapus">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                `;
+                historyListEl.appendChild(itemDiv);
+            });
+        }
+
+        // Fungsi Save History
+        function saveToHistory(sourceText, translatedText) {
+            const history = JSON.parse(localStorage.getItem('translationHistory')) || [];
+            const newItem = {
+                id: Date.now(),
+                source: sourceText,
+                result: translatedText,
+                timestamp: new Date().toISOString()
+            };
+            history.push(newItem);
+            
+            // Opsional: Batasi history (misal maks 50 item)
+            if (history.length > 50) history.shift();
+
+            localStorage.setItem('translationHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        // Fungsi Delete Item (Dibuat global agar bisa dipanggil onclick di HTML string)
+        window.deleteHistoryItem = function(id) {
+            let history = JSON.parse(localStorage.getItem('translationHistory')) || [];
+            history = history.filter(item => item.id !== id);
+            localStorage.setItem('translationHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        // Helper untuk mencegah XSS saat render HTML
+        function escapeHtml(text) {
+            if (!text) return text;
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
         
         const translateButton = document.getElementById('translateButton');
 
         translateButton.addEventListener('click', async function() {
             // Ambil values
             const apiKey = document.getElementById('apiKey').value.trim();
-            // MODIFIKASI: Ambil URL dari input, jika kosong gunakan default
             let apiUrl = document.getElementById('apiUrl').value.trim();
             if (!apiUrl) apiUrl = DEFAULT_API_URL;
 
@@ -297,7 +520,7 @@
             translateButton.disabled = true;
 
             let userPrompt;
-            // (Bagian Logic Prompt tetap sama seperti sebelumnya)
+            // Logic Prompt
             if (targetLanguage === 'auto') {
                 if (translationStyle === 'casual') {
                     userPrompt = `You are a professional English↔Indonesian translator.
@@ -398,8 +621,9 @@
                 "content": userPrompt
             }];
 
+            let fullTranslatedText = ""; // Variable untuk menampung seluruh hasil
+
             try {
-                // MODIFIKASI: Gunakan variabel apiUrl dalam fetch
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
@@ -445,6 +669,7 @@
                                 const content = parsed.choices[0].delta.content;
                                 if (content) {
                                     translatedContent.textContent += content;
+                                    fullTranslatedText += content; // Kumpulkan text
                                 }
                             } catch (e) {
                                 console.error('Error parsing JSON:', e);
@@ -452,6 +677,12 @@
                         }
                     }
                 }
+
+                // SIMPAN KE HISTORY SETELAH SELESAI
+                if (fullTranslatedText.trim().length > 0) {
+                    saveToHistory(inputText, fullTranslatedText);
+                }
+
             } catch (error) {
                 translatedContent.textContent = `Terjadi kesalahan: ${error.message}`;
                 console.error('Error:', error);
