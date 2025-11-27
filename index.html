@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Translator + History</title>
     <style>
+        /* --- STYLE GLOBAL & DESKTOP (TIDAK DIGANGGU) --- */
         body {
             font-family: Arial, sans-serif;
             background-color: #1a1a1af7;
@@ -18,16 +19,8 @@
             padding: 0;
         }
 
-        /* Aturan untuk perangkat mobile */
-        @media only screen and (max-width: 767px) {
-            body {
-                min-height: 100vh;
-                align-items: flex-start;
-            }
-        }
-
-        /* Aturan untuk desktop */
-        @media only screen and (min-width: 768px) {
+        /* Aturan Desktop Default */
+        @media only screen and (min-width: 1025px) {
             body {
                 height: 100vh;
             }
@@ -86,9 +79,10 @@
             color: #e0e0e0;
         }
 
+        /* Tinggi default untuk desktop */
         textarea {
             width: 100%;
-            height: 625px;
+            height: 625px; 
             padding: 12px;
             border: 1px solid #444;
             border-radius: 4px;
@@ -155,12 +149,9 @@
 
         #translatedText {
             background-color: #3a3a3a;
-            height: 600px;
+            height: 600px; /* Tinggi default desktop */
             border-radius: 4px;
-            padding: 0px;
-            padding-left: 20px;
-            padding-right: 20px;
-            padding-bottom: 20px;
+            padding: 20px; /* Diperbaiki paddingnya agar konsisten */
             overflow-y: auto;
             white-space: pre-line;
             word-wrap: break-word;
@@ -168,6 +159,7 @@
             font-family: Arial, sans-serif;
             font-size: 14px;
             color: #e0e0e0;
+            border: 1px solid #444; /* Tambahan border agar mirip textarea */
         }
 
         .error { color: #ff6b6b; }
@@ -185,7 +177,7 @@
             right: 30px;
             width: 60px;
             height: 60px;
-            background-color: #2196F3;
+            background-color: #4CAF50;
             border-radius: 50%;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             display: flex;
@@ -201,18 +193,17 @@
             transform: scale(1.1);
         }
 
-        /* UPDATED CSS FOR NEW ICON */
         .history-btn svg {
             width: 30px;
             height: 30px;
-            stroke: white; /* Menggunakan stroke karena icon baru berbasis garis */
-            fill: none;    /* Memastikan tidak ada fill hitam */
+            stroke: white;
+            fill: none;
         }
 
         .history-sidebar {
             position: fixed;
             top: 0;
-            right: -400px; /* Sembunyi secara default */
+            right: -400px;
             width: 350px;
             height: 100vh;
             background-color: #2a2a2a;
@@ -300,22 +291,99 @@
         }
         /* --- HISTORY STYLES END --- */
 
-        @media (max-width: 1024px) {
-            .translator-layout { flex-direction: column; }
-            .translator-middle {
-                flex-direction: row;
-                width: 100%;
-                justify-content: space-between;
-                margin: 20px 0;
+
+        /* --- OPTIMASI KHUSUS MOBILE & TABLET --- */
+        
+        /* Tablet & Mobile (Layar di bawah 1024px) */
+        @media only screen and (max-width: 1024px) {
+            body {
+                /* Reset height agar bisa scroll jika konten panjang */
+                height: auto;
+                min-height: 100vh;
+                align-items: flex-start;
+                padding-top: 10px;
+                padding-bottom: 10px;
             }
-            .translator-middle>* { width: 48%; }
+
+            .translator-container {
+                width: 95%; /* Lebih lebar di mobile */
+                padding: 15px; /* Kurangi padding container */
+                margin-bottom: 60px; /* Ruang untuk tombol history */
+            }
+
+            h2 {
+                margin-top: 0;
+                margin-bottom: 15px;
+                font-size: 1.3rem;
+            }
+
+            .translator-layout {
+                flex-direction: column; /* Stack vertikal */
+                gap: 10px;
+            }
+
+            /* INPUT & OUTPUT BOX - Kunci Tampilan Satu Layar */
+            /* Menggunakan vh (viewport height) agar proporsional dengan layar HP */
+            textarea {
+                height: 25vh; /* Mengambil 25% tinggi layar */
+                min-height: 150px; /* Batas minimal */
+            }
+
+            #translatedText {
+                height: 30vh; /* Mengambil 30% tinggi layar (sedikit lebih besar utk hasil) */
+                min-height: 150px;
+                padding: 12px; /* Samakan padding dengan textarea */
+            }
+
+            /* PENGATURAN GRID TOMBOL (Tengah) */
+            .translator-middle {
+                width: 100%;
+                flex-direction: row; /* Ubah orientasi jadi baris */
+                flex-wrap: wrap; /* Izinkan membungkus */
+                justify-content: space-between;
+                gap: 8px; /* Jarak antar elemen */
+                margin: 5px 0;
+            }
+
+            /* Membuat elemen setting berdampingan rapi */
+            .translator-middle input[type="text"] {
+                width: 48%; /* Bagi dua kolom */
+                margin-bottom: 0;
+                font-size: 13px; /* Font agak kecil agar muat */
+            }
+
+            .translator-middle select {
+                width: 48%; /* Bagi dua kolom */
+                margin-bottom: 0;
+                font-size: 13px;
+            }
+
+            .translator-middle button {
+                width: 100%; /* Tombol tetap full width */
+                margin-top: 5px;
+                padding: 10px;
+            }
+            
+            /* Label adjustment */
+            label {
+                font-size: 0.9rem;
+            }
         }
 
-        @media (max-width: 600px) {
-            .translator-middle { flex-direction: column; }
-            .translator-middle>* { width: 100%; }
+        /* Mobile Kecil (Layar di bawah 600px) */
+        @media only screen and (max-width: 600px) {
             .history-sidebar { width: 100%; right: -100%; }
             .history-btn { width: 50px; height: 50px; bottom: 20px; right: 20px; }
+            
+            /* Penyesuaian agar input tidak terlalu kecil di layar sangat kecil */
+            textarea, #translatedText {
+                font-size: 16px; /* Mencegah zoom otomatis pada iPhone */
+            }
+            
+            /* Pastikan API URL dan Key tetap rapi */
+            .translator-middle input[type="text"] {
+                width: 48%; /* Tetap 2 kolom */
+            }
         }
     </style>
 </head>
@@ -330,8 +398,8 @@
             </div>
             <div class="translator-middle">
                 <input type="text" id="apiUrl" placeholder="API URL (Default: Cerebras)" />
-                
                 <input type="text" id="apiKey" placeholder="API Key" />
+                
                 <select id="targetLanguage">
                     <option value="auto">Auto (EN ↔ ID)</option>
                     <option value="English">Inggris</option>
