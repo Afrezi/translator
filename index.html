@@ -314,8 +314,7 @@
     .history-btn svg {
         width: 30px;
         height: 30px;
-        stroke: white;
-        fill: none;
+        fill: white; /* UBAH DARI STROKE KE FILL AGAR ICON BARU MUNCUL */
     }
 
     @media (max-width: 600px) {
@@ -483,8 +482,9 @@
     </div>
 
     <div class="history-btn" id="historyToggleBtn" title="Lihat History">
-        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16">
+            <path fill="currentColor" d="M8.06.56A8.05 8.05 0 0 0 1.24 4.2V1.55H0V5a1.16 1.16 0 0 0 1.15 1.14h3.44V4.9H2.27a6.79 6.79 0 0 1 5.79-3.1a6.48 6.48 0 0 1 6.7 6.2a6.48 6.48 0 0 1-6.7 6.2A6.48 6.48 0 0 1 1.36 8H.12a7.71 7.71 0 0 0 7.94 7.44A7.71 7.71 0 0 0 16 8A7.71 7.71 0 0 0 8.06.56"/>
+            <path fill="currentColor" d="M7.44 4.28v4.34h3.6V7.38H8.68v-3.1z"/>
         </svg>
     </div>
 
