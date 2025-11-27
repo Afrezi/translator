@@ -7,386 +7,430 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Translator + History</title>
     <style>
-        /* --- STYLE GLOBAL & DESKTOP (TIDAK DIGANGGU) --- */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #1a1a1af7;
+        color: #e0e0e0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    @media only screen and (max-width: 1024px) {
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1af7;
-            color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Aturan Desktop Default */
-        @media only screen and (min-width: 1025px) {
-            body {
-                height: 100vh;
-            }
-        }
-
-        .translator-container {
-            width: 90%;
-            max-width: 2200px;
-            background-color: #2a2a2a;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        h2 {
-            text-align: center;
-            color: #ffffff;
-            margin-bottom: 20px;
-        }
-
-        .translator-layout {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .translator-column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .translator-middle {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 200px;
-        }
-
-        label {
-            font-weight: bold;
-            color: #b0b0b0;
-            margin-bottom: 5px;
-        }
-
-        input[type="text"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #444;
-            border-radius: 4px;
+            align-items: flex-start;
+            padding: 10px;
             box-sizing: border-box;
-            margin-bottom: 10px;
-            background-color: #333;
-            color: #e0e0e0;
         }
+    }
 
-        /* Tinggi default untuk desktop */
-        textarea {
-            width: 100%;
-            height: 625px; 
-            padding: 12px;
-            border: 1px solid #444;
-            border-radius: 4px;
-            resize: none;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            background-color: #333;
-            color: #e0e0e0;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 45px;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        button:disabled {
-            background-color: #3a753d;
-            cursor: not-allowed;
-        }
-        
-        button .button-text {
-            display: inline;
-        }
-
-        button:disabled .button-text {
-            display: none;
-        }
-        
-        .button-loader {
-            width: 18px;
-            height: 18px;
-            border: 2px solid #fff;
-            border-bottom-color: transparent;
-            border-radius: 50%;
-            display: none;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
-        }
-
-        button:disabled .button-loader {
-            display: inline-block;
-        }
-
-        @keyframes rotation {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #translatedText {
-            background-color: #3a3a3a;
-            height: 600px; /* Tinggi default desktop */
-            border-radius: 4px;
-            padding: 20px; /* Diperbaiki paddingnya agar konsisten */
-            overflow-y: auto;
-            white-space: pre-line;
-            word-wrap: break-word;
-            cursor: pointer;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            color: #e0e0e0;
-            border: 1px solid #444; /* Tambahan border agar mirip textarea */
-        }
-
-        .error { color: #ff6b6b; }
-        .loading { color: #4ecdc4; }
-
-        #translatedText.copied {
-            background-color: #2c3e50;
-            transition: background-color 0.5s;
-        }
-
-        /* --- HISTORY STYLES START --- */
-        .history-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background-color: #4CAF50;
-            border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 1000;
-            transition: transform 0.2s;
-        }
-
-        .history-btn:hover {
-            background-color: #1976D2;
-            transform: scale(1.1);
-        }
-
-        .history-btn svg {
-            width: 30px;
-            height: 30px;
-            stroke: white;
-            fill: none;
-        }
-
-        .history-sidebar {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 350px;
+    @media only screen and (min-width: 1025px) {
+        body {
             height: 100vh;
-            background-color: #2a2a2a;
-            box-shadow: -4px 0 10px rgba(0,0,0,0.5);
-            z-index: 1001;
-            transition: right 0.3s ease-in-out;
-            display: flex;
-            flex-direction: column;
             padding: 20px;
             box-sizing: border-box;
         }
+    }
 
-        .history-sidebar.open {
-            right: 0;
+    .translator-container {
+        width: 100%;
+        max-width: 2200px;
+        background-color: #2a2a2a;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+
+    @media (min-width: 1025px) {
+        .translator-container {
+            height: 100%;
+            max-height: 100%;
         }
+    }
 
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 10px;
-        }
-
-        .close-history {
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 24px;
-            cursor: pointer;
-            width: auto;
-            padding: 0;
-            min-height: auto;
-        }
-
-        .history-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .history-item {
-            background-color: #333;
+    @media (max-width: 1024px) {
+        .translator-container {
             padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            position: relative;
-            border-left: 4px solid #4CAF50;
+            max-width: 100%;
+            min-height: calc(100vh - 20px);
         }
+    }
 
-        .history-source {
-            font-size: 13px;
-            color: #aaa;
-            margin-bottom: 8px;
-            font-style: italic;
+    h2 {
+        text-align: center;
+        color: #ffffff;
+        margin: 0 0 15px 0;
+    }
+
+    @media (max-width: 767px) {
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
         }
+    }
 
-        .history-result {
+    .translator-layout {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        flex: 1;
+        min-height: 0;
+    }
+
+    @media (max-width: 1024px) {
+        .translator-layout {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+
+    .translator-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .translator-middle {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 200px;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 1024px) {
+        .translator-middle {
+            width: 100%;
+            flex: 0 0 auto;
+        }
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .settings-grid label {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+    }
+
+    label {
+        font-weight: bold;
+        color: #b0b0b0;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    @media (max-width: 767px) {
+        label {
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+    }
+
+    input[type="text"],
+    select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #444;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        background-color: #333;
+        color: #e0e0e0;
+    }
+
+    @media (max-width: 767px) {
+        input[type="text"],
+        select {
+            padding: 8px;
             font-size: 14px;
-            color: #e0e0e0;
+            margin-bottom: 8px;
         }
+    }
 
-        .delete-item-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            color: #ff6b6b;
-            cursor: pointer;
-            width: auto;
-            min-height: auto;
-            padding: 5px;
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #444;
+        border-radius: 4px;
+        resize: none;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        background-color: #333;
+        color: #e0e0e0;
+        flex: 1;
+        min-height: 0;
+    }
+
+    @media (max-width: 1024px) and (min-width: 768px) {
+        textarea {
+            min-height: 150px;
         }
+    }
 
-        .delete-item-btn:hover {
-            background: rgba(255, 107, 107, 0.1);
-            border-radius: 4px;
+    @media (max-width: 767px) {
+        textarea {
+            min-height: 120px;
+            padding: 10px;
+            font-size: 13px;
+        }
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 45px;
+    }
+
+    @media (max-width: 767px) {
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            min-height: 40px;
+        }
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    button:disabled {
+        background-color: #3a753d;
+        cursor: not-allowed;
+    }
+  
+    button .button-text {
+        display: inline;
+    }
+
+    button:disabled .button-text {
+        display: none;
+    }
+  
+    .button-loader {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #fff;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: none;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+    }
+
+    button:disabled .button-loader {
+        display: inline-block;
+    }
+
+    @keyframes rotation {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    #translatedText {
+        background-color: #3a3a3a;
+        border-radius: 4px;
+        padding: 20px;
+        overflow-y: auto;
+        white-space: pre-line;
+        word-wrap: break-word;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #e0e0e0;
+        flex: 1;
+        box-sizing: border-box;
+        min-height: 0;
+    }
+
+    @media (max-width: 1024px) and (min-width: 768px) {
+        #translatedText {
+            min-height: 150px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        #translatedText {
+            min-height: 120px;
+            padding: 15px;
+            font-size: 13px;
+        }
+    }
+
+    .error { color: #ff6b6b; }
+    .loading { color: #4ecdc4; }
+
+    #translatedText.copied {
+        background-color: #2c3e50;
+        transition: background-color 0.5s;
+    }
+
+    .history-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background-color: #4CAF50;
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 1000;
+        transition: transform 0.2s;
+    }
+
+    .history-btn:hover {
+        background-color: #1976D2;
+        transform: scale(1.1);
+    }
+
+    .history-btn svg {
+        width: 30px;
+        height: 30px;
+        stroke: white;
+        fill: none;
+    }
+
+    @media (max-width: 600px) {
+        .history-btn {
+            width: 50px;
+            height: 50px;
+            bottom: 20px;
+            right: 20px;
         }
         
-        .empty-history {
-            text-align: center;
-            color: #777;
-            margin-top: 50px;
+        .history-btn svg {
+            width: 25px;
+            height: 25px;
         }
-        /* --- HISTORY STYLES END --- */
+    }
 
+    .history-sidebar {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 350px;
+        height: 100vh;
+        background-color: #2a2a2a;
+        box-shadow: -4px 0 10px rgba(0,0,0,0.5);
+        z-index: 1001;
+        transition: right 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        box-sizing: border-box;
+    }
 
-        /* --- OPTIMASI KHUSUS MOBILE & TABLET --- */
-        
-        /* Tablet & Mobile (Layar di bawah 1024px) */
-        @media only screen and (max-width: 1024px) {
-            body {
-                /* Reset height agar bisa scroll jika konten panjang */
-                height: auto;
-                min-height: 100vh;
-                align-items: flex-start;
-                padding-top: 10px;
-                padding-bottom: 10px;
-            }
+    .history-sidebar.open {
+        right: 0;
+    }
 
-            .translator-container {
-                width: 95%; /* Lebih lebar di mobile */
-                padding: 15px; /* Kurangi padding container */
-                margin-bottom: 60px; /* Ruang untuk tombol history */
-            }
-
-            h2 {
-                margin-top: 0;
-                margin-bottom: 15px;
-                font-size: 1.3rem;
-            }
-
-            .translator-layout {
-                flex-direction: column; /* Stack vertikal */
-                gap: 10px;
-            }
-
-            /* INPUT & OUTPUT BOX - Kunci Tampilan Satu Layar */
-            /* Menggunakan vh (viewport height) agar proporsional dengan layar HP */
-            textarea {
-                height: 25vh; /* Mengambil 25% tinggi layar */
-                min-height: 150px; /* Batas minimal */
-            }
-
-            #translatedText {
-                height: 30vh; /* Mengambil 30% tinggi layar (sedikit lebih besar utk hasil) */
-                min-height: 150px;
-                padding: 12px; /* Samakan padding dengan textarea */
-            }
-
-            /* PENGATURAN GRID TOMBOL (Tengah) */
-            .translator-middle {
-                width: 100%;
-                flex-direction: row; /* Ubah orientasi jadi baris */
-                flex-wrap: wrap; /* Izinkan membungkus */
-                justify-content: space-between;
-                gap: 8px; /* Jarak antar elemen */
-                margin: 5px 0;
-            }
-
-            /* Membuat elemen setting berdampingan rapi */
-            .translator-middle input[type="text"] {
-                width: 48%; /* Bagi dua kolom */
-                margin-bottom: 0;
-                font-size: 13px; /* Font agak kecil agar muat */
-            }
-
-            .translator-middle select {
-                width: 48%; /* Bagi dua kolom */
-                margin-bottom: 0;
-                font-size: 13px;
-            }
-
-            .translator-middle button {
-                width: 100%; /* Tombol tetap full width */
-                margin-top: 5px;
-                padding: 10px;
-            }
-            
-            /* Label adjustment */
-            label {
-                font-size: 0.9rem;
-            }
+    @media (max-width: 600px) {
+        .history-sidebar {
+            width: 100%;
+            right: -100%;
         }
+    }
 
-        /* Mobile Kecil (Layar di bawah 600px) */
-        @media only screen and (max-width: 600px) {
-            .history-sidebar { width: 100%; right: -100%; }
-            .history-btn { width: 50px; height: 50px; bottom: 20px; right: 20px; }
-            
-            /* Penyesuaian agar input tidak terlalu kecil di layar sangat kecil */
-            textarea, #translatedText {
-                font-size: 16px; /* Mencegah zoom otomatis pada iPhone */
-            }
-            
-            /* Pastikan API URL dan Key tetap rapi */
-            .translator-middle input[type="text"] {
-                width: 48%; /* Tetap 2 kolom */
-            }
-        }
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+    }
+
+    .close-history {
+        background: none;
+        border: none;
+        color: #aaa;
+        font-size: 24px;
+        cursor: pointer;
+        width: auto;
+        padding: 0;
+        min-height: auto;
+    }
+
+    .history-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .history-item {
+        background-color: #333;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        position: relative;
+        border-left: 4px solid #4CAF50;
+    }
+
+    .history-source {
+        font-size: 13px;
+        color: #aaa;
+        margin-bottom: 8px;
+        font-style: italic;
+    }
+
+    .history-result {
+        font-size: 14px;
+        color: #e0e0e0;
+    }
+
+    .delete-item-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #ff6b6b;
+        cursor: pointer;
+        width: auto;
+        min-height: auto;
+        padding: 5px;
+    }
+
+    .delete-item-btn:hover {
+        background: rgba(255, 107, 107, 0.1);
+        border-radius: 4px;
+    }
+  
+    .empty-history {
+        text-align: center;
+        color: #777;
+        margin-top: 50px;
+    }
     </style>
 </head>
+
 
 <body>
     <div class="translator-container">
@@ -396,31 +440,39 @@
                 <label for="inputText">Teks yang Ingin Diterjemahkan:</label>
                 <textarea id="inputText" placeholder="Masukkan teks di sini..."></textarea>
             </div>
+            
             <div class="translator-middle">
-                <input type="text" id="apiUrl" placeholder="API URL (Default: Cerebras)" />
-                <input type="text" id="apiKey" placeholder="API Key" />
+                <div class="settings-grid">
+                    <label>Konfigurasi API:</label>
+                    <input type="text" id="apiUrl" placeholder="API URL (Default: Cerebras)" />
+                    <input type="text" id="apiKey" placeholder="API Key" />
+                </div>
                 
-                <select id="targetLanguage">
-                    <option value="auto">Auto (EN ↔ ID)</option>
-                    <option value="English">Inggris</option>
-                    <option value="Indonesian">Indonesia</option>
-                    <option value="Spanish">Spanyol</option>
-                    <option value="French">Prancis</option>
-                    <option value="German">Jerman</option>
-                    <option value="Chinese">Mandarin</option>
-                    <option value="Japanese">Jepang</option>
-                    <option value="Korean">Korea</option>
-                </select>
-                <select id="translationStyle">
-                    <option value="standard">Standar</option>
-                    <option value="casual">Kasual</option>
-                </select>
+                <div class="settings-grid">
+                    <label>Pengaturan Terjemahan:</label>
+                    <select id="targetLanguage">
+                        <option value="auto">Auto (EN ↔ ID)</option>
+                        <option value="English">Inggris</option>
+                        <option value="Indonesian">Indonesia</option>
+                        <option value="Spanish">Spanyol</option>
+                        <option value="French">Prancis</option>
+                        <option value="German">Jerman</option>
+                        <option value="Chinese">Mandarin</option>
+                        <option value="Japanese">Jepang</option>
+                        <option value="Korean">Korea</option>
+                    </select>
+                    <select id="translationStyle">
+                        <option value="standard">Standar</option>
+                        <option value="casual">Kasual</option>
+                    </select>
+                </div>
 
                 <button id="translateButton">
                     <span class="button-text">Terjemahkan</span>
                     <span class="button-loader"></span>
                 </button>
-                </div>
+            </div>
+            
             <div class="translator-column">
                 <label for="translatedText">Hasil Terjemahan:</label>
                 <div id="translatedText">
@@ -442,40 +494,33 @@
             <button class="close-history" id="closeHistoryBtn">&times;</button>
         </div>
         <div class="history-list" id="historyList">
-            </div>
+        </div>
     </div>
 
     <script>
-        // Default URL jika user tidak mengubahnya
         const DEFAULT_API_URL = 'https://api.cerebras.ai/v1/chat/completions';
 
-        // History Management
         const historySidebar = document.getElementById('historySidebar');
         const historyListEl = document.getElementById('historyList');
-        
-        // Load API Key, URL, dan Setup History saat halaman dimuat
+      
         document.addEventListener('DOMContentLoaded', function() {
-            // Load API Key
             const savedApiKey = localStorage.getItem('openaiApiKey');
             if (savedApiKey) {
                 document.getElementById('apiKey').value = savedApiKey;
             }
 
-            // Load API URL
             const savedApiUrl = localStorage.getItem('customApiUrl');
             const apiUrlInput = document.getElementById('apiUrl');
-            
+          
             if (savedApiUrl) {
                 apiUrlInput.value = savedApiUrl;
             } else {
                 apiUrlInput.value = DEFAULT_API_URL;
             }
 
-            // Load History UI
             renderHistory();
         });
 
-        // Toggle History Sidebar
         document.getElementById('historyToggleBtn').addEventListener('click', () => {
             historySidebar.classList.add('open');
         });
@@ -484,14 +529,12 @@
             historySidebar.classList.remove('open');
         });
 
-        // Menutup sidebar jika klik di luar area sidebar (opsional tapi bagus untuk UX)
         document.addEventListener('click', (e) => {
             if (!historySidebar.contains(e.target) && !document.getElementById('historyToggleBtn').contains(e.target) && historySidebar.classList.contains('open')) {
                 historySidebar.classList.remove('open');
             }
         });
 
-        // Fungsi Render History
         function renderHistory() {
             const history = JSON.parse(localStorage.getItem('translationHistory')) || [];
             historyListEl.innerHTML = '';
@@ -501,7 +544,6 @@
                 return;
             }
 
-            // Urutkan dari yang terbaru (reverse)
             history.slice().reverse().forEach(item => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'history-item';
@@ -518,7 +560,6 @@
             });
         }
 
-        // Fungsi Save History
         function saveToHistory(sourceText, translatedText) {
             const history = JSON.parse(localStorage.getItem('translationHistory')) || [];
             const newItem = {
@@ -528,15 +569,13 @@
                 timestamp: new Date().toISOString()
             };
             history.push(newItem);
-            
-            // Opsional: Batasi history (misal maks 50 item)
+          
             if (history.length > 50) history.shift();
 
             localStorage.setItem('translationHistory', JSON.stringify(history));
             renderHistory();
         }
 
-        // Fungsi Delete Item (Dibuat global agar bisa dipanggil onclick di HTML string)
         window.deleteHistoryItem = function(id) {
             let history = JSON.parse(localStorage.getItem('translationHistory')) || [];
             history = history.filter(item => item.id !== id);
@@ -544,7 +583,6 @@
             renderHistory();
         }
 
-        // Helper untuk mencegah XSS saat render HTML
         function escapeHtml(text) {
             if (!text) return text;
             return text
@@ -552,13 +590,12 @@
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+                .replace(/'/g, "'");
         }
-        
+      
         const translateButton = document.getElementById('translateButton');
 
         translateButton.addEventListener('click', async function() {
-            // Ambil values
             const apiKey = document.getElementById('apiKey').value.trim();
             let apiUrl = document.getElementById('apiUrl').value.trim();
             if (!apiUrl) apiUrl = DEFAULT_API_URL;
@@ -582,7 +619,6 @@
                 return;
             }
 
-            // Simpan ke localStorage (Key dan URL)
             localStorage.setItem('openaiApiKey', apiKey);
             localStorage.setItem('customApiUrl', apiUrl);
 
@@ -590,7 +626,6 @@
             translateButton.disabled = true;
 
             let userPrompt;
-            // Logic Prompt
             if (targetLanguage === 'auto') {
                 if (translationStyle === 'casual') {
                     userPrompt = `You are a professional English↔Indonesian translator.
@@ -603,7 +638,7 @@
        - If mixed → translate everything into the opposite of the dominant language so the final output is in one language only.
 
     Style:
-    - Keep an informal, easy-going tone that mirrors the source’s register, slang, and emojis.
+    - Keep an informal, easy-going tone that mirrors the source's register, slang, and emojis.
     - Preserve meaning, intent, nuance, and natural phrasing.
 
     Constraints:
@@ -648,7 +683,7 @@
                     userPrompt = `Your only task is to translate the following text into ${targetLanguage}.
 
     Style:
-    - Use an informal, easy-going tone that mirrors the source’s register, slang, and emojis.
+    - Use an informal, easy-going tone that mirrors the source's register, slang, and emojis.
     - Preserve meaning, intent, nuance, and natural phrasing.
 
     Constraints:
@@ -691,7 +726,7 @@
                 "content": userPrompt
             }];
 
-            let fullTranslatedText = ""; // Variable untuk menampung seluruh hasil
+            let fullTranslatedText = "";
 
             try {
                 const response = await fetch(apiUrl, {
@@ -739,7 +774,7 @@
                                 const content = parsed.choices[0].delta.content;
                                 if (content) {
                                     translatedContent.textContent += content;
-                                    fullTranslatedText += content; // Kumpulkan text
+                                    fullTranslatedText += content;
                                 }
                             } catch (e) {
                                 console.error('Error parsing JSON:', e);
@@ -748,7 +783,6 @@
                     }
                 }
 
-                // SIMPAN KE HISTORY SETELAH SELESAI
                 if (fullTranslatedText.trim().length > 0) {
                     saveToHistory(inputText, fullTranslatedText);
                 }
