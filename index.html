@@ -752,10 +752,11 @@
                 }];
 
                 // SISTEM AUTO-RETRY
-                let maxRetries = 4;
+                const maxRetries = 4;
                 let attempt = 0;
                 let success = false;
                 let fullTranslatedText = "";
+                let hasSavedToHistory = false;
 
                 while (attempt < maxRetries && !success) {
                     try {
@@ -821,14 +822,27 @@
                             }
                         }
 
-                        success = true;
-
-                        if (fullTranslatedText.trim().length > 0) {
+                        if (fullTranslatedText.trim().length > 0 && !hasSavedToHistory) {
                             saveToHistory(inputText, fullTranslatedText);
+                            hasSavedToHistory = true;
                         }
+
+                        success = true;
 
                     } catch (error) {
                         console.error(`Gagal pada percobaan ke-${attempt + 1}:`, error);
+
+                        if (fullTranslatedText.trim().length > 0) {
+                            console.warn('Terjemahan sudah diterima sebelum koneksi terputus. Retry dibatalkan untuk mencegah duplikasi request.');
+
+                            if (!hasSavedToHistory) {
+                                saveToHistory(inputText, fullTranslatedText);
+                                hasSavedToHistory = true;
+                            }
+
+                            success = true;
+                            break;
+                        }
                         attempt++;
 
                         if (attempt >= maxRetries) {
